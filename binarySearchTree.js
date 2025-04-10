@@ -78,39 +78,35 @@ class Tree {
   deleteItem(value, node = this.root) {
     let currNode = node;
 
-    // leaf node, one child
-    if (
-      value == currNode.value &&
-      currNode.left == null &&
-      currNode.right == null
-    ) {
-      currNode = null;
-    } else if (value == currNode.value && currNode.left == null) {
-      currNode = currNode.right;
-    } else if (value == currNode.value && currNode.right == null) {
-      currNode = currNode.left;
-    } else if (value == node.value) {
-      let successorNode = this.#inorderSuccessor(node.right);
-      currNode.value = successorNode.value;
-      successorNode = successorNode.right;
-      // currNode.right = this.deleteItem(currNode.value, currNode.right);
-      // this.deleteItem(successorNode.value);
+    if (value == node.value) {
+      currNode = this.#removeNodeHelper(currNode);
     } else if (value < node.value) {
-      currNode = this.deleteItem(value, node.left);
+      currNode.left = this.deleteItem(value, node.left);
     } else if (value > node.value) {
-      currNode = this.deleteItem(value, node.right);
+      currNode.right = this.deleteItem(value, node.right);
     }
     return currNode;
   }
 
   #inorderSuccessor(node) {
     let successorNode = node;
-
     while (successorNode.left) {
       successorNode = successorNode.left;
     }
-
     return successorNode;
+  }
+
+  #removeNodeHelper(node) {
+    if (node.left && node.right) {
+      let successorNode = this.#inorderSuccessor(node.right);
+      node.value = successorNode.value;
+      node.right = this.deleteItem(successorNode.value, node.right);
+      return node;
+    } else {
+      let replacementNode = node.left || node.right;
+      node = null;
+      return replacementNode;
+    }
   }
 
   depth(value) {
