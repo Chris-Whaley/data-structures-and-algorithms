@@ -1,14 +1,12 @@
-class Square {
-  constructor(currentSquare = null, nextSquare = null) {
-    this.currentSquare = currentSquare;
-    this.nextSquare = nextSquare;
-  }
-}
-
 class ChessBoard {
   constructor(start, end) {
     this.start = start;
     this.end = end;
+    this.queue = [];
+    this.queue.push(start);
+    this.visited = new Map();
+    this.path = [];
+    this.path.push(this.start);
     this.board = this.createBoard();
     this.availableMoves = [
       [1, 2],
@@ -35,39 +33,66 @@ class ChessBoard {
     return board;
   }
 
-  findPath(
-    start = this.start,
-    end = this.end,
-    possibleMoves = this.availableMoves
-  ) {
-    let currentSquare = new Square(start);
-    let queue = [];
+  findPath(position = this.start, queue = this.queue) {
+    let predecessor = position;
+    let nextSquares = [];
 
-    queue = this.queueMoves(currentSquare, possibleMoves);
+    // record squares that we've landed on
+    this.visited.set(predecessor[0], predecessor[1]);
 
-    queue.forEach((element) => {
-      //   if (element[0] == end[0] && element[1] == end[1]) {
-      //     return element;
-      //   }
-      //   currentSquare.nextSquare = element;
-    });
+    // record square prior to the end location
+    if (predecessor[0] == this.end[0] && predecessor[1] == this.end[1]) {
+      this.path.push(predecessor);
+      return predecessor;
+    }
 
-    queue.forEach((element) => {
-      this.findPath(element, end, possibleMoves);
-    });
+    // if current square isn't the end, then pull the next possible squares we can move to
+    for (let index = 0; index < queue.length; index++) {
+      nextSquares = this.queueMoves(queue[index]);
+    }
+
+    // are any of the next squares the end?
+    for (let index = 0; index < nextSquares.length; index++) {
+      if (
+        nextSquares[index][0] == this.end[0] &&
+        nextSquares[index][1] == this.end[1]
+      ) {
+        return nextSquares[index];
+      } else if (
+        this.visited.has(nextSquares[index][0], nextSquares[index][1])
+      ) {
+        nextSquares.splice(index, 0);
+      }
+    }
+
+    // iterate through each of these next possible squares
+    for (let index = 0; index < nextSquares.length; index++) {
+      let square = nextSquares[index];
+      let arrived = this.findPath(square, nextSquares);
+
+      if (arrived[0] == this.end[0] && arrived[1] == this.end[1]) {
+        this.path.push(square);
+        this.path.push(this.end);
+        console.log(this.path);
+        return square;
+      }
+    }
   }
 
-  queueMoves(currentSquare, possibleMoves) {
+  queueMoves(currentSquare) {
     let nextSquares = [];
-    possibleMoves.forEach((element) => {
+    this.availableMoves.forEach((element) => {
       const nextY = currentSquare[0] + element[0];
       const nextX = currentSquare[1] + element[1];
-      nextSquares.push([nextY, nextX]);
+
+      if (nextY >= 0 && nextY <= 7 && nextX >= 0 && nextX <= 7) {
+        nextSquares.push([nextY, nextX]);
+      }
     });
 
     return nextSquares;
   }
 }
 
-const chessboard = new ChessBoard([0, 0], [3, 3]);
+const chessboard = new ChessBoard([0, 0], [4, 5]);
 chessboard.findPath();
