@@ -21,13 +21,15 @@ class ChessBoard {
   }
 
   createBoard() {
-    let row = new Array(8);
-    let board = new Array(8).fill(row);
+    // let row = new Array(8).fill(0);
+    // let board = new Array(8).fill(row);
+    let board = new Array(8);
 
     // y-axis is board index, x-axis is the row array's index (ex: board[0][7] = y=0 and x=7; bottom row, right column; bottom-right corner square)
     for (let i = 0; i < board.length; i++) {
+      let row = new Array(8).fill(0);
       for (let j = 0; j < board.length; j++) {
-        board[i][j] = j;
+        board[i] = row;
       }
     }
     return board;
@@ -35,10 +37,10 @@ class ChessBoard {
 
   findPath(position = this.start, queue = this.queue) {
     let predecessor = position;
-    let nextSquares = [];
+    let nextSquares = this.queueMoves(predecessor);
 
     // record squares that we've landed on
-    this.visited.set(predecessor[0], predecessor[1]);
+    // this.visited.set(predecessor[0], predecessor[1]);
 
     // record square prior to the end location
     if (predecessor[0] == this.end[0] && predecessor[1] == this.end[1]) {
@@ -48,20 +50,19 @@ class ChessBoard {
 
     // if current square isn't the end, then pull the next possible squares we can move to
     for (let index = 0; index < queue.length; index++) {
-      nextSquares = this.queueMoves(queue[index]);
+      // nextSquares = this.queueMoves(queue[index]);
+      nextSquares = this.queueMoves(predecessor);
     }
 
     // are any of the next squares the end?
     for (let index = 0; index < nextSquares.length; index++) {
-      if (
-        nextSquares[index][0] == this.end[0] &&
-        nextSquares[index][1] == this.end[1]
-      ) {
+      let y = nextSquares[index][0];
+      let x = nextSquares[index][1];
+      if (y == this.end[0] && x == this.end[1]) {
         return nextSquares[index];
-      } else if (
-        this.visited.has(nextSquares[index][0], nextSquares[index][1])
-      ) {
-        nextSquares.splice(index, 0);
+      } else if (this.board[y][x] != 0) {
+      } else {
+        this.board[y][x] = nextSquares[index];
       }
     }
 
