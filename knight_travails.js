@@ -177,14 +177,17 @@ class ChessBoard {
 
     while (queue.length > 0) {
       let position = queue.shift();
+      let tempPath = [];
+      tempPath.push(this.end);
+      tempPath.unshift(position);
 
       while (position[0] != this.start[0] && position[1] != this.start[1]) {
         let predecessor = this.board[position[0]][position[1]];
-        path.push(predecessor);
+        tempPath.unshift(predecessor);
         position = predecessor;
       }
 
-      path = [...path];
+      path.push(tempPath);
     }
   }
 }
